@@ -168,6 +168,27 @@ See U-Boot AMLogic boards [documentation](https://docs.u-boot.org/en/latest/boar
 **Note:** Some boards (eg LibreComputer AML-S905X-CC "Le Potato") requires you to use a, non standard, USB A to A (male to male) cable to enable the USB recovery.
 This USB cable needs to power up the board, ie it needs to have its internal VBUS cable connected, which is not always the case if you made it yourself. After connecting the USB A to A cable and properly setting up boot switches and/or buttons, a new AMLogic USB device should be enumerated. After that, you might need to provide additional power by connecting another MicroUSB cable to the board.
 
+### Synaptics Astra SL26xx
+
+Set the board's boot pins to USB boot and connect the USB device port. The
+recovery sequence uses the CDC serial devices `06cb:019e` and `cafe:4002`,
+followed by the U-Boot Fastboot device `18d1:4ee0`. Install the udev rules
+printed by `snagrecover --udev` before running recovery.
+
+The firmware configuration must provide the opaque key, SPK, M52BL, SysMgr,
+BL, TZK, and `uEnv.txt` files. Start with the
+`sl2619-coralboard.yaml` template and replace the paths with the files matching
+the board's secure-boot, DDR, memory-layout, and U-Boot build.
+
+```console
+snagrecover -s sl2619 \
+  -f src/snagrecover/templates/sl2619-coralboard.yaml \
+  --usb-path BUS-PORT
+```
+
+The tool waits for each USB re-enumeration and keeps the selected physical USB
+path, which is important when several recovery boards are connected.
+
 **DISCLAIMER: USB A to A type of cable can seriously harm your hardware, use it at your own risk.**
 
 ### Renesas RZ/N1

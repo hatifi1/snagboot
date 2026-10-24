@@ -411,6 +411,10 @@ def get_recovery(soc_family: str):
 		from snagrecover.recoveries.qcom import main as qcom_recovery
 
 		return qcom_recovery
+	elif soc_family == "sl26xx":
+		from snagrecover.recoveries.sl26xx import main as sl26xx_recovery
+
+		return sl26xx_recovery
 	else:
 		cli_error(f"unsupported board family {soc_family}")
 

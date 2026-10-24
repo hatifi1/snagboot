@@ -249,6 +249,10 @@ def run_firmware(port, fw_name: str, subfw_name: str = ""):
 		from snagrecover.firmware.qcom_fw import qcom_run
 
 		qcom_run(port, fw_name, fw_blob)
+	elif soc_family == "sl26xx":
+		from snagrecover.firmware.sl26xx_fw import sl26xx_run
+
+		sl26xx_run(port, fw_name, fw_blob)
 	else:
 		raise Exception(f"Unsupported SoC family {soc_family}")
 	logger.info(f"Done installing firmware {fw_name}")

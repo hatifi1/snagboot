@@ -1,4 +1,6 @@
 tested:
+  sl2619:
+        family: sl26xx
   a20:
         family: sunxi
   a33:

@@ -1,0 +1,16 @@
+paths-relative-to: THIS_FILE
+
+key:
+  path: key.bin
+spk:
+  path: spk.bin
+m52bl:
+  path: m52bl.bin
+sysmgr:
+  path: sysmgr.subimg
+bl:
+  path: bl.subimg
+tzk:
+  path: tzk.subimg
+uenv:
+  path: uEnv.txt
