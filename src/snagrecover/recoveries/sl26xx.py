@@ -27,7 +27,9 @@ def _find_serial_port(usb_dev) -> str:
 	for info in list_ports.comports():
 		if info.vid != usb_dev.idVendor or info.pid != usb_dev.idProduct:
 			continue
-		if info.location is None or info.location == target or info.location.startswith(target + "-"):
+		if info.location is None or info.location == target or info.location.startswith(
+			(target + "-", target + ":")
+		):
 			matches.append(info.device)
 	if len(matches) != 1:
 		raise RuntimeError(
@@ -43,13 +45,9 @@ def _open_serial(usb_dev):
 	return serial.Serial(path, baudrate=230400, bytesize=8, parity="N", stopbits=1, timeout=0.2)
 
 
-def _wait_for_stage(vid: int, pid: int, interfaces: int | None = None):
+def _wait_for_stage(vid: int, pid: int):
 	def ready(dev):
-		if dev.idVendor != vid or dev.idProduct != pid:
-			return False
-		if interfaces is None:
-			return True
-		return len(list(dev.get_active_configuration().interfaces())) == interfaces
+		return dev.idVendor == vid and dev.idProduct == pid
 
 	return get_usb(recovery_config["usb_path"], ready_check=ready)
 
@@ -63,12 +61,12 @@ def _run_serial_stage(usb_dev, name: str) -> None:
 
 
 def main():
-	usb_dev = get_usb(recovery_config["usb_path"])
+	usb_dev = _wait_for_stage(*BOOTROM)
 	for name in ("key", "spk", "m52bl"):
 		_run_serial_stage(usb_dev, name)
 
 	logger.info("Waiting for M52BL re-enumeration...")
-	usb_dev = _wait_for_stage(*BOOTROM, interfaces=1)
+	usb_dev = _wait_for_stage(*BOOTROM)
 	_run_serial_stage(usb_dev, "sysmgr")
 
 	logger.info("Waiting for SysMgr re-enumeration...")
