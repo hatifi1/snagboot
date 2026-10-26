@@ -6,6 +6,7 @@
 # as published by the Free Software Foundation; either version 2 of the License.
 
 import logging
+import time
 
 import serial
 from serial.tools import list_ports
@@ -19,24 +20,29 @@ logger = logging.getLogger("snagrecover")
 BOOTROM = (0x06CB, 0x019E)
 SYSMGR = (0xCAFE, 0x4002)
 FASTBOOT = (0x18D1, 0x4EE0)
+SERIAL_PORT_TIMEOUT = 5.0
 
 
 def _find_serial_port(usb_dev) -> str:
 	target = f"{usb_dev.bus}-" + "-".join(str(p) for p in usb_dev.port_numbers)
-	matches = []
-	for info in list_ports.comports():
-		if info.vid != usb_dev.idVendor or info.pid != usb_dev.idProduct:
-			continue
-		if info.location is None or info.location == target or info.location.startswith(
-			(target + "-", target + ":")
-		):
-			matches.append(info.device)
-	if len(matches) != 1:
-		raise RuntimeError(
-			f"expected one CDC serial port for {usb_dev.idVendor:04x}:{usb_dev.idProduct:04x}, "
-			f"found {matches}"
-		)
-	return matches[0]
+	deadline = time.monotonic() + SERIAL_PORT_TIMEOUT
+	while True:
+		matches = []
+		for info in list_ports.comports():
+			if info.vid != usb_dev.idVendor or info.pid != usb_dev.idProduct:
+				continue
+			if info.location is None or info.location == target or info.location.startswith(
+				(target + "-", target + ":")
+			):
+				matches.append(info.device)
+		if len(matches) == 1:
+			return matches[0]
+		if time.monotonic() >= deadline:
+			raise RuntimeError(
+				f"expected one CDC serial port for {usb_dev.idVendor:04x}:{usb_dev.idProduct:04x}, "
+				f"found {matches}"
+			)
+		time.sleep(0.05)
 
 
 def _open_serial(usb_dev):
