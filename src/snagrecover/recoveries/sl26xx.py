@@ -48,7 +48,16 @@ def _find_serial_port(usb_dev) -> str:
 def _open_serial(usb_dev):
 	path = _find_serial_port(usb_dev)
 	logger.info("Opening CDC serial port %s", path)
-	return serial.Serial(path, baudrate=230400, bytesize=8, parity="N", stopbits=1, timeout=0.2)
+	deadline = time.monotonic() + SERIAL_PORT_TIMEOUT
+	while True:
+		try:
+			return serial.Serial(
+				path, baudrate=230400, bytesize=8, parity="N", stopbits=1, timeout=0.2
+			)
+		except serial.SerialException:
+			if time.monotonic() >= deadline:
+				raise
+			time.sleep(0.05)
 
 
 def _wait_for_stage(vid: int, pid: int):
