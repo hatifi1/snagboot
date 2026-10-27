@@ -112,3 +112,9 @@ class TestFastboot(unittest.TestCase):
 		self.expect_device_response(ResponseType.OKAY, b" executed via UCmd")
 		self.fastboot.oem_run(subcommand)
 		self.assert_device_write(f"UCmd:{subcommand}\x00")
+
+	def test_oem_run_no_wait(self) -> None:
+		self.fastboot.oem_run_basecmd = "oem run"
+		self.fastboot.oem_run_no_wait("setenv fb_exit 1")
+		self.assert_device_write("oem run:setenv fb_exit 1\x00")
+		self.mock_device.read.assert_not_called()

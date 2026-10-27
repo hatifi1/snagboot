@@ -209,6 +209,13 @@ class Fastboot:
 		packet = f"{self.oem_run_basecmd}:{cmd}\x00"
 		self.cmd(packet)
 
+	def oem_run_no_wait(self, cmd: str):
+		"""Execute an arbitrary U-Boot command without waiting for its response."""
+		if self.oem_run_basecmd is None:
+			self.oem_run("version")
+		packet = f"{self.oem_run_basecmd}:{cmd}\x00"
+		self.dev.write(self.ep_out, packet, timeout=self.timeout)
+
 	def oem_format(self):
 		"""
 		Execute gpt write mmc <dev> $partitions

@@ -31,7 +31,10 @@ def sl26xx_run(port, fw_name: str, fw_blob: bytes):
 		return
 
 	if fw_name == "uenv":
-		Fastboot(port).send(fw_blob)
+		fastboot = Fastboot(port)
+		fastboot.send(fw_blob)
+		fastboot.oem_run("setenv fb_ret OKAY")
+		fastboot.oem_run_no_wait("setenv fb_exit 1")
 		return
 
 	cli_error(f"unsupported firmware {fw_name}")
