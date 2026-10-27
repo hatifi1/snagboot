@@ -32,3 +32,15 @@ class TestSl26xxProtocol(unittest.TestCase):
 		packet = port.write.call_args.args[0]
 		self.assertEqual(packet[:4], b"\x5b\x5a\x33\x02")
 		self.assertEqual(struct.unpack_from("<I", packet, 4)[0], 5)
+
+	def test_upload_header_uses_byte_size(self):
+		port = MagicMock()
+		port.write.side_effect = lambda data: len(data)
+		port.read.side_effect = [
+			b"\x5b\x5a\x00\x00\x00\x00\x00\x00",
+			b"\x5b\x5a\x00\x00\x00\x00\x00\x00",
+		]
+		payload = b"12345678"
+		Sl26xxProtocol(port).upload(payload, Sl26xxProtocol.IMG_SYSMGR, 0xB4A00000, raw=True)
+		packet = port.write.call_args_list[0].args[0]
+		self.assertEqual(struct.unpack_from("<I", packet, 8)[0], len(payload))

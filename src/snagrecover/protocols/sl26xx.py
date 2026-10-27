@@ -145,7 +145,7 @@ class Sl26xxProtocol:
 			address=address,
 			image_type=image_type,
 			raw=raw,
-			num_words=(len(payload) + 3) // 4,
+			num_words=len(payload),
 		)
 		if code != 0:
 			raise Sl26xxError(f"upload setup failed: {code}")
