@@ -44,3 +44,9 @@ class TestSl26xxProtocol(unittest.TestCase):
 		Sl26xxProtocol(port).upload(payload, Sl26xxProtocol.IMG_SYSMGR, 0xB4A00000, raw=True)
 		packet = port.write.call_args_list[0].args[0]
 		self.assertEqual(struct.unpack_from("<I", packet, 8)[0], len(payload))
+
+	def test_run_image_does_not_wait_for_disconnect(self):
+		port = MagicMock()
+		port.write.side_effect = lambda data: len(data)
+		Sl26xxProtocol(port).run_image(0xB4A00000)
+		port.read.assert_not_called()

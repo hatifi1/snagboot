@@ -161,6 +161,7 @@ class Sl26xxProtocol:
 			self.OP_RUN_IMAGE,
 			address=address,
 			raw=True,
+			wait=False,
 		) != 0:
 			raise Sl26xxError("run image failed")
 
