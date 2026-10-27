@@ -151,8 +151,9 @@ class Sl26xxProtocol:
 			raise Sl26xxError(f"upload setup failed: {code}")
 		for offset in range(0, len(payload), self.STREAM_CHUNK):
 			self._write_all(payload[offset : offset + self.STREAM_CHUNK])
-		if self._response_code(raw, 20.0) != 0:
-			raise Sl26xxError("upload verification failed")
+		verify_code = self._response_code(raw, 20.0)
+		if verify_code != 0:
+			raise Sl26xxError(f"upload verification failed: {verify_code:#x}")
 
 	def run_image(self, address: int) -> None:
 		if self._send_packet(
